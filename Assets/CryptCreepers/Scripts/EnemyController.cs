@@ -6,10 +6,14 @@ public class EnemyController : MonoBehaviour
 {
     [SerializeField] int health = 1;
     [SerializeField] float enemySpeed = 1;
+    GameObject[] spawnPoints;
 
     Transform playerPosition;
     private void Start() {
         playerPosition = FindObjectOfType<PlayerController>().transform;
+        spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
+        int random = Random.Range(0, spawnPoints.Length);
+        transform.position = spawnPoints[random].transform.position;
     }
     private void Update() {
         Vector2 playerDirection = playerPosition.position - transform.position;
