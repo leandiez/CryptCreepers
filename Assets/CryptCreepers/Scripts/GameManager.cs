@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] int score;
+
+    public int Score{
+        get => score;
+        set {
+            score = value;
+            if(score % 1000 == 0){
+                gameDifficult++;
+            }}
+    }
 
     public static GameManager instance;
     public bool gameIsRunning = true;

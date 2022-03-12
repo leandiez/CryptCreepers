@@ -6,6 +6,7 @@ public class EnemyController : MonoBehaviour
 {
     [SerializeField] int health = 1;
     [SerializeField] float enemySpeed = 1;
+    [SerializeField] int enemyScore = 100;
     GameObject[] spawnPoints;
 
     Transform playerPosition;
@@ -20,12 +21,16 @@ public class EnemyController : MonoBehaviour
         transform.position += (Vector3)playerDirection.normalized * Time.deltaTime * enemySpeed;
     }
     private void OnTriggerEnter2D(Collider2D other) {
-        other.GetComponent<PlayerController>().TakeDamage();
+        if(other.CompareTag("Player")){
+            other.GetComponent<PlayerController>().TakeDamage();    
+        }
+        
     }
 
     public void TakeDamage(){
         health--;
         if(health <= 0){
+            GameManager.instance.Score += enemyScore;
             Destroy(gameObject);
         }
     }

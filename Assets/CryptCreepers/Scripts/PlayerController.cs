@@ -9,17 +9,17 @@ public class PlayerController : MonoBehaviour
     Vector3 moveDirection;
     Vector2 facingDirection;
     bool gunLoaded = true;
+    bool bigShotEnabled = false;
+    bool isInvulnerable = false;
     //Editor variables
     [SerializeField] float playerSpeed = 5;
     [SerializeField] float health = 5;
     [SerializeField] Transform aimTransform;
     [SerializeField] Camera mainCamera;
     [SerializeField] GameObject bullet;
+    [Range (1.0f,10.0f)] [SerializeField] float fireRate = 1.0f;
+    
 
-    void Start()
-    {
-        
-    }
     void Update()
     {
         //Player movement
@@ -38,20 +38,50 @@ public class PlayerController : MonoBehaviour
             gunLoaded = false;
             float angle = Mathf.Atan2(facingDirection.y, facingDirection.x) * Mathf.Rad2Deg; //Get the angle in degree, needed to make rotate the bullet before instantiate
             Quaternion targetRotation = Quaternion.AngleAxis(angle, Vector3.forward); //Get the rotation object to asign to the instantiation
-            Instantiate (bullet, transform.position , targetRotation);
+            GameObject bigShot = Instantiate(bullet, transform.position , targetRotation);
+            if(bigShotEnabled){
+                bigShot.GetComponent<BulletController>().isBigShot = true;
+            }
+            
             StartCoroutine(ReloadGun());
         }
     }
 
     IEnumerator ReloadGun(){
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(1/fireRate);
         gunLoaded = true;
     }
 
+    IEnumerator InvulnerabilityTime(){
+        isInvulnerable = true;
+        GetComponent<SpriteRenderer>().color = Color.red;
+        yield return new WaitForSeconds(3);
+        GetComponent<SpriteRenderer>().color = Color.white;
+        isInvulnerable = false;
+    }
+
     public void TakeDamage(){
-        health--;
+        if(!isInvulnerable){
+            health--;
+            StartCoroutine(InvulnerabilityTime());
+        }
         if(health <= 0){
             Destroy(gameObject);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other) {
+        if(other.CompareTag("PowerUp")){
+            switch(other.GetComponent<PowerUpVariants>().powerUpType){
+                case(PowerUpVariants.PowerUpType.FireRateIncrease):
+                    fireRate++;
+                    Destroy(other.gameObject,0.1f);
+                    break;
+                case(PowerUpVariants.PowerUpType.BigShot):
+                    bigShotEnabled = true;
+                    Destroy(other.gameObject,0.1f);
+                    break;
+            }
         }
     }
 }
